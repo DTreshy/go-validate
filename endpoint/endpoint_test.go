@@ -162,3 +162,10 @@ func TestValidate(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkValidate(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		inputNum := i % len(validateTestCases)
+		endpoint.Validate(validateTestCases[inputNum].input)
+	}
+}
