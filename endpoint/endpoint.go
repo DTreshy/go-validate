@@ -42,7 +42,7 @@ func Validate(address string) error {
 func isValidDomain(name string) error {
 	switch {
 	case name == "":
-		return nil
+		return fmt.Errorf("domain can't be empty")
 	case len(name) > 255:
 		return fmt.Errorf("domain length is %d, can't exceed 255", len(name))
 	}
