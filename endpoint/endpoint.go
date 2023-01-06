@@ -49,12 +49,11 @@ func isValidDomain(name string) error {
 
 	var l int
 
-	for i := 0; i < len(name); i++ {
-		b := name[i]
-		if b == '.' {
+	for i, char := range name {
+		if char == '.' {
 			switch {
 			case i == l:
-				return fmt.Errorf("invalid character '%c' at offset %d: label can't begin with a period", b, i)
+				return fmt.Errorf("invalid character '%c' at offset %d: label can't begin with a period", rune(char), i)
 			case i-l > 63:
 				return fmt.Errorf("byte length of label '%s' is %d, can't exceed 63", name[l:i], i-l)
 			case name[l] == '-':
@@ -68,7 +67,7 @@ func isValidDomain(name string) error {
 			continue
 		}
 
-		if !(b >= 'a' && b <= 'z' || b >= '0' && b <= '9' || b == '-' || b >= 'A' && b <= 'Z') {
+		if !(char >= 'a' && char <= 'z' || char >= '0' && char <= '9' || char == '-' || char >= 'A' && char <= 'Z') {
 			c, _ := utf8.DecodeRuneInString(name[i:])
 			if c == utf8.RuneError {
 				return fmt.Errorf("invalid rune at offset %d", i)
