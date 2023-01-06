@@ -16,10 +16,7 @@ func Validate(address string) error {
 		return fmt.Errorf("invalid address format: %v", address)
 	}
 
-	isIP, err := regexp.Match(`^\d+\.\d+\.\d+\.\d+$`, []byte(host[0]))
-	if err != nil {
-		return err
-	}
+	isIP, _ := regexp.Match(`^\d+\.\d+\.\d+\.\d+$`, []byte(host[0]))
 
 	if isIP {
 		if r := net.ParseIP(host[0]); r == nil {
