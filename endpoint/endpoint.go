@@ -16,7 +16,7 @@ func Validate(address string) error {
 		return fmt.Errorf("invalid address format: %v", address)
 	}
 
-	isIP, err := regexp.Match(fmt.Sprintf(`^%[1]v.%[1]v.%[1]v.%[1]v$`, `(25[0-5]|(2[0-4]|1\d|[1-9]|)\d)`), []byte(host[0]))
+	isIP, err := regexp.Match(`^\d+\.\d+\.\d+\.\d+$`, []byte(host[0]))
 	if err != nil {
 		return err
 	}
