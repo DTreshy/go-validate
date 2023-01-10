@@ -1,4 +1,4 @@
-package endpoint
+package validate
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 // Validate return nil if address have a valid domain or an ip address and a port, else it returns an error.
-func Validate(address string) error {
+func Endpoint(address string) error {
 	host := strings.Split(address, ":")
 	if len(host) != 2 {
 		return fmt.Errorf("invalid address format: %v", address)

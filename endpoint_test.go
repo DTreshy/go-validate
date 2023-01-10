@@ -1,13 +1,13 @@
-package endpoint_test
+package validate_test
 
 import (
 	"testing"
 
-	"github.com/DTreshy/go-validate/endpoint"
+	"github.com/DTreshy/go-validate"
 	"github.com/stretchr/testify/require"
 )
 
-var validateTestCases = []struct {
+var endpointTestCases = []struct {
 	name    string
 	input   string
 	wantErr bool
@@ -144,10 +144,10 @@ var validateTestCases = []struct {
 	},
 }
 
-func TestValidate(t *testing.T) {
-	for _, tt := range validateTestCases {
+func TestEndpoint(t *testing.T) {
+	for _, tt := range endpointTestCases {
 		t.Run(tt.name, func(t *testing.T) {
-			err := endpoint.Validate(tt.input)
+			err := validate.Endpoint(tt.input)
 			require.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -155,7 +155,7 @@ func TestValidate(t *testing.T) {
 
 func BenchmarkValidate(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		inputNum := i % len(validateTestCases)
-		endpoint.Validate(validateTestCases[inputNum].input)
+		inputNum := i % len(endpointTestCases)
+		validate.Endpoint(endpointTestCases[inputNum].input)
 	}
 }
