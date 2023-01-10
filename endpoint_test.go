@@ -48,17 +48,7 @@ var endpointTestCases = []struct {
 		wantErr: true,
 	},
 	{
-		name:    "valid domain name with hyphens and valid port",
-		input:   "example-domain.com:80",
-		wantErr: false,
-	},
-	{
-		name:    "valid domain name with digits and valid port",
-		input:   "example123.com:80",
-		wantErr: false,
-	},
-	{
-		name:    "empty endpoint",
+		name:    "empty",
 		input:   "",
 		wantErr: true,
 	},
@@ -68,78 +58,8 @@ var endpointTestCases = []struct {
 		wantErr: true,
 	},
 	{
-		name:    "maximum length domain label and valid port",
-		input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com:80",
-		wantErr: false,
-	},
-	{
-		name:    "maximum length plus one domain label and valid port",
-		input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl.com:80",
-		wantErr: true,
-	},
-	{
-		name:    "maximum length domain and valid port",
-		input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk:80",
-		wantErr: false,
-	},
-	{
-		name:    "maximum length plus one domain and valid port",
-		input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl:80",
-		wantErr: true,
-	},
-	{
-		name:    "maximum length domain name and valid port",
-		input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk:80",
-		wantErr: false,
-	},
-	{
-		name:    "maximum length domain name plus one and valid port",
-		input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijks:80",
-		wantErr: true,
-	},
-	{
-		name:    "domain name with invalid character and valid port",
-		input:   "example$domain.com:80",
-		wantErr: true,
-	},
-	{
-		name:    "label with invalid rune and valid port",
-		input:   "example\uFFFDdomain.com:80",
-		wantErr: true,
-	},
-	{
-		name:    "label with hyphen on the beggining and valid port",
-		input:   "example.-com.invalid:80",
-		wantErr: true,
-	},
-	{
-		name:    "label with hyphen on the end and valid port",
-		input:   "example.com-.invalid:80",
-		wantErr: true,
-	},
-	{
-		name:    "domain beginning with hyphen and valid port",
-		input:   "-example:80",
-		wantErr: true,
-	},
-	{
-		name:    "domain ending with hyphen and valid port",
-		input:   "example-:80",
-		wantErr: true,
-	},
-	{
-		name:    "domain ending with a dot and valid port",
-		input:   "example.:80",
-		wantErr: true,
-	},
-	{
-		name:    "domain without dot with valid port",
-		input:   "example:80",
-		wantErr: false,
-	},
-	{
-		name:    "domain without dot with invalid port",
-		input:   "example:-1",
+		name:    "valid domain and invalid format port",
+		input:   "example.com:invalid",
 		wantErr: true,
 	},
 }
@@ -153,9 +73,207 @@ func TestEndpoint(t *testing.T) {
 	}
 }
 
-func BenchmarkValidate(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		inputNum := i % len(endpointTestCases)
-		validate.Endpoint(endpointTestCases[inputNum].input)
+func TestPort(t *testing.T) {
+	var portTestCases = []struct {
+		name    string
+		input   int
+		wantErr bool
+	}{
+		{
+			name:    "valid port",
+			input:   80,
+			wantErr: false,
+		},
+		{
+			name:    "too big port",
+			input:   808080,
+			wantErr: true,
+		},
+		{
+			name:    "zero port",
+			input:   0,
+			wantErr: true,
+		},
+		{
+			name:    "negative port",
+			input:   -1,
+			wantErr: true,
+		},
+		{
+			name:    "max port",
+			input:   65535,
+			wantErr: false,
+		},
+		{
+			name:    "max plus 1 port",
+			input:   65536,
+			wantErr: true,
+		},
+	}
+	for _, tt := range portTestCases {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validate.Port(tt.input)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
+	}
+}
+
+func TestIPv4(t *testing.T) {
+	var IPv4TestCases = []struct {
+		name    string
+		input   string
+		wantErr bool
+	}{
+		{
+			name:    "valid ip",
+			input:   "192.0.2.1",
+			wantErr: false,
+		},
+		{
+			name:    "invalid ip",
+			input:   "300.0.2.1",
+			wantErr: true,
+		},
+		{
+			name:    "too short format ip",
+			input:   "192.0.2",
+			wantErr: true,
+		},
+		{
+			name:    "too long",
+			input:   "192.0.2.1.9",
+			wantErr: true,
+		},
+		{
+			name:    "invalid format ip",
+			input:   "invalid",
+			wantErr: true,
+		},
+	}
+	for _, tt := range IPv4TestCases {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validate.IPv4(tt.input)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
+	}
+}
+
+func TestDomain(t *testing.T) {
+	var DomainTestCases = []struct {
+		name    string
+		input   string
+		wantErr bool
+	}{
+		{
+			name:    "valid domain",
+			input:   "example.com",
+			wantErr: false,
+		},
+		{
+			name:    "domain beggining with a dot",
+			input:   ".invalid.domain",
+			wantErr: true,
+		},
+		{
+			name:    "domain beggining with a hyphen",
+			input:   "-invalid.domain",
+			wantErr: true,
+		},
+		{
+			name:    "domain beggining with a digit",
+			input:   "9invalid.domain",
+			wantErr: false,
+		},
+		{
+			name:    "domain being a number",
+			input:   "999",
+			wantErr: false,
+		},
+		{
+			name:    "domain name with hyphens",
+			input:   "example-domain.com",
+			wantErr: false,
+		},
+		{
+			name:    "domain name with digits",
+			input:   "example123.com",
+			wantErr: false,
+		},
+		{
+			name:    "empty domain",
+			input:   "",
+			wantErr: true,
+		},
+		{
+			name:    "maximum length domain label",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.com",
+			wantErr: false,
+		},
+		{
+			name:    "maximum length plus one domain label",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl.com",
+			wantErr: true,
+		},
+		{
+			name:    "maximum length top level domain label",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk",
+			wantErr: false,
+		},
+		{
+			name:    "maximum length plus one top level domain label",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijkl",
+			wantErr: true,
+		},
+		{
+			name:    "maximum length domain name",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk",
+			wantErr: false,
+		},
+		{
+			name:    "maximum length domain name plus one",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijks",
+			wantErr: true,
+		},
+		{
+			name:    "domain name with invalid character",
+			input:   "example$domain.com",
+			wantErr: true,
+		},
+		{
+			name:    "label with invalid rune",
+			input:   "example\uFFFDdomain.com",
+			wantErr: true,
+		},
+		{
+			name:    "label with hyphen on the beggining",
+			input:   "example.-com.invalid",
+			wantErr: true,
+		},
+		{
+			name:    "label with hyphen on the end",
+			input:   "example.com-.invalid",
+			wantErr: true,
+		},
+		{
+			name:    "domain ending with a hyphen",
+			input:   "example-",
+			wantErr: true,
+		},
+		{
+			name:    "domain beggining with a hyphen",
+			input:   "-example",
+			wantErr: true,
+		},
+		{
+			name:    "domain ending with a dot",
+			input:   "example.",
+			wantErr: true,
+		},
+	}
+	for _, tt := range DomainTestCases {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validate.Domain(tt.input)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
 	}
 }
