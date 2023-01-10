@@ -83,8 +83,6 @@ func isValidDomain(name string) error {
 		return fmt.Errorf("top level domain '%s' at offset %d begins with a hyphen", name[l:], l)
 	case name[len(name)-1] == '-':
 		return fmt.Errorf("top level domain '%s' at offset %d ends with a hyphen", name[l:], l)
-	case name[l] >= '0' && name[l] <= '9':
-		return fmt.Errorf("top level domain '%s' at offset %d begins with a digit", name[l:], l)
 	}
 
 	return nil

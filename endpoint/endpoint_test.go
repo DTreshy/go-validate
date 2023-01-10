@@ -128,11 +128,6 @@ var validateTestCases = []struct {
 		wantErr: true,
 	},
 	{
-		name:    "domain beggining with digit and valid port",
-		input:   "9example:80",
-		wantErr: true,
-	},
-	{
 		name:    "domain ending with a dot and valid port",
 		input:   "example.:80",
 		wantErr: true,
