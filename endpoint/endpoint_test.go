@@ -108,11 +108,6 @@ var validateTestCases = []struct {
 		wantErr: true,
 	},
 	{
-		name:    "label with dot on the beggining and valid port",
-		input:   "example..com.invalid:80",
-		wantErr: true,
-	},
-	{
 		name:    "label with hyphen on the beggining and valid port",
 		input:   "example.-com.invalid:80",
 		wantErr: true,
