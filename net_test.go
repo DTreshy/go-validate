@@ -7,67 +7,117 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var endpointTestCases = []struct {
-	name    string
-	input   string
-	wantErr bool
-}{
-	{
-		name:    "valid IP address and port",
-		input:   "192.0.2.1:80",
-		wantErr: false,
-	},
-	{
-		name:    "invalid IP address and valid port",
-		input:   "300.0.2.1:80",
-		wantErr: true,
-	},
-	{
-		name:    "valid IP address and invalid port",
-		input:   "192.0.2.1:808080",
-		wantErr: true,
-	},
-	{
-		name:    "valid domain name and port",
-		input:   "example.com:80",
-		wantErr: false,
-	},
-	{
-		name:    "invalid domain name and valid port",
-		input:   "invalid..domain:80",
-		wantErr: true,
-	},
-	{
-		name:    "valid domain name and invalid port",
-		input:   "example.com:65536",
-		wantErr: true,
-	},
-	{
-		name:    "missing port",
-		input:   "example.com",
-		wantErr: true,
-	},
-	{
-		name:    "empty",
-		input:   "",
-		wantErr: true,
-	},
-	{
-		name:    "port only",
-		input:   ":80",
-		wantErr: true,
-	},
-	{
-		name:    "valid domain and invalid format port",
-		input:   "example.com:invalid",
-		wantErr: true,
-	},
-}
-
 func TestEndpoint(t *testing.T) {
+	var endpointTestCases = []struct {
+		name    string
+		input   string
+		wantErr bool
+	}{
+		{
+			name:    "valid IP address and port",
+			input:   "192.0.2.1:80",
+			wantErr: false,
+		},
+		{
+			name:    "invalid IP address as valid domain and valid port",
+			input:   "300.0.2.1:80",
+			wantErr: false,
+		},
+		{
+			name:    "valid IP address and invalid port",
+			input:   "192.0.2.1:808080",
+			wantErr: true,
+		},
+		{
+			name:    "valid domain name and port",
+			input:   "example.com:80",
+			wantErr: false,
+		},
+		{
+			name:    "invalid domain name and valid port",
+			input:   "invalid..domain:80",
+			wantErr: true,
+		},
+		{
+			name:    "valid domain name and invalid port",
+			input:   "example.com:65536",
+			wantErr: true,
+		},
+		{
+			name:    "missing port",
+			input:   "example.com",
+			wantErr: true,
+		},
+		{
+			name:    "empty",
+			input:   "",
+			wantErr: true,
+		},
+		{
+			name:    "port only",
+			input:   ":80",
+			wantErr: true,
+		},
+		{
+			name:    "valid domain and invalid format port",
+			input:   "example.com:invalid",
+			wantErr: true,
+		},
+	}
+
 	for _, tt := range endpointTestCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validate.Endpoint(tt.input)
+			require.Equal(t, tt.wantErr, err != nil)
+		})
+	}
+}
+
+func TestPortString(t *testing.T) {
+	var portStringTestCases = []struct {
+		name    string
+		input   string
+		wantErr bool
+	}{
+		{
+			name:    "valid port",
+			input:   "80",
+			wantErr: false,
+		},
+		{
+			name:    "too big port",
+			input:   "808080",
+			wantErr: true,
+		},
+		{
+			name:    "zero port",
+			input:   "0",
+			wantErr: true,
+		},
+		{
+			name:    "negative port",
+			input:   "-1",
+			wantErr: true,
+		},
+		{
+			name:    "max port",
+			input:   "65535",
+			wantErr: false,
+		},
+		{
+			name:    "max plus 1 port",
+			input:   "65536",
+			wantErr: true,
+		},
+		{
+			name:    "not a number",
+			input:   "invalid",
+			wantErr: true,
+		},
+	}
+	for _, tt := range portStringTestCases {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validate.PortString(tt.input)
 			require.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -118,8 +168,8 @@ func TestPort(t *testing.T) {
 	}
 }
 
-func TestIPv4(t *testing.T) {
-	var IPv4TestCases = []struct {
+func TestIP(t *testing.T) {
+	var IPTestCases = []struct {
 		name    string
 		input   string
 		wantErr bool
@@ -127,6 +177,16 @@ func TestIPv4(t *testing.T) {
 		{
 			name:    "valid ip",
 			input:   "192.0.2.1",
+			wantErr: false,
+		},
+		{
+			name:    "RFC2732 compatible IPv6 endpoint representation",
+			input:   "[2001:db8::68]",
+			wantErr: false,
+		},
+		{
+			name:    "RFC2732 compatible IPv6 endpoint representation (for IPv4 address)",
+			input:   "[::ffff:192.0.2.1]",
 			wantErr: false,
 		},
 		{
@@ -150,9 +210,9 @@ func TestIPv4(t *testing.T) {
 			wantErr: true,
 		},
 	}
-	for _, tt := range IPv4TestCases {
+	for _, tt := range IPTestCases {
 		t.Run(tt.name, func(t *testing.T) {
-			err := validate.IPv4(tt.input)
+			err := validate.IP(tt.input)
 			require.Equal(t, tt.wantErr, err != nil)
 		})
 	}
@@ -167,6 +227,11 @@ func TestDomain(t *testing.T) {
 		{
 			name:    "valid domain",
 			input:   "example.com",
+			wantErr: false,
+		},
+		{
+			name:    "invalid ipv4 is valid domain",
+			input:   "300.0.2.1",
 			wantErr: false,
 		},
 		{
@@ -226,12 +291,12 @@ func TestDomain(t *testing.T) {
 		},
 		{
 			name:    "maximum length domain name",
-			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghi",
 			wantErr: false,
 		},
 		{
 			name:    "maximum length domain name plus one",
-			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijks",
+			input:   "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk.abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghij",
 			wantErr: true,
 		},
 		{
