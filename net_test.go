@@ -115,6 +115,7 @@ func TestPortString(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range portStringTestCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validate.PortString(tt.input)
@@ -160,6 +161,7 @@ func TestPort(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range portTestCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validate.Port(tt.input)
@@ -210,6 +212,7 @@ func TestIP(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range IPTestCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validate.IP(tt.input)
@@ -235,17 +238,17 @@ func TestDomain(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "domain beggining with a dot",
+			name:    "domain beginning with a dot",
 			input:   ".invalid.domain",
 			wantErr: true,
 		},
 		{
-			name:    "domain beggining with a hyphen",
+			name:    "domain beginning with a hyphen",
 			input:   "-invalid.domain",
 			wantErr: true,
 		},
 		{
-			name:    "domain beggining with a digit",
+			name:    "domain beginning with a digit",
 			input:   "9invalid.domain",
 			wantErr: false,
 		},
@@ -310,7 +313,7 @@ func TestDomain(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "label with hyphen on the beggining",
+			name:    "label with hyphen on the beginning",
 			input:   "example.-com.invalid",
 			wantErr: true,
 		},
@@ -325,7 +328,7 @@ func TestDomain(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "domain beggining with a hyphen",
+			name:    "domain beginning with a hyphen",
 			input:   "-example",
 			wantErr: true,
 		},
@@ -335,6 +338,7 @@ func TestDomain(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range DomainTestCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := validate.Domain(tt.input)

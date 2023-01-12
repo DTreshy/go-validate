@@ -35,3 +35,9 @@ tasks:
     cmds:
       - go tool cover -func={{.COVERAGE_FILE}}
     silent: true
+
+  lint:
+    desc: runs golangci-lint linter
+    cmds:
+      - golangci-lint run --timeout 5m ./...
+    silent: true
