@@ -131,7 +131,7 @@ func nextLabel(address []byte) (label, remaining []byte, err error) {
 			return address[:i], address[i+1:], nil
 		}
 
-		if !(b >= 'a' && b <= 'z' || b >= '0' && b <= '9' || b == '-' || b >= 'A' && b <= 'Z') {
+		if !(isLetter(b) || isDigit(b) || b == '-') {
 			c, _ := utf8.DecodeRuneInString(string(address[i:]))
 			if c == utf8.RuneError {
 				return nil, address, fmt.Errorf("invalid rune at offset %d", i)
@@ -142,4 +142,12 @@ func nextLabel(address []byte) (label, remaining []byte, err error) {
 	}
 
 	return address, nil, nil
+}
+
+func isDigit(digit byte) bool {
+	return digit >= '0' && digit <= '9'
+}
+
+func isLetter(letter byte) bool {
+	return (letter >= 'a' && letter <= 'z') || (letter >= 'A' && letter <= 'Z')
 }
